@@ -51,6 +51,7 @@ class IntegrationBase
             propagate(dt_buf[i], acc_buf[i], gyr_buf[i]);
     }
 
+    // 中值预积分, 对偏置进行了估计，这段代码是IMU预积分的核心代码
     void midPointIntegration(double _dt, 
                             const Eigen::Vector3d &_acc_0, const Eigen::Vector3d &_gyr_0,
                             const Eigen::Vector3d &_acc_1, const Eigen::Vector3d &_gyr_1,
@@ -68,7 +69,7 @@ class IntegrationBase
         result_delta_p = delta_p + delta_v * _dt + 0.5 * un_acc * _dt * _dt;
         result_delta_v = delta_v + un_acc * _dt;
         result_linearized_ba = linearized_ba;
-        result_linearized_bg = linearized_bg;         
+        result_linearized_bg = linearized_bg;
 
         if(update_jacobian)
         {
@@ -77,15 +78,15 @@ class IntegrationBase
             Vector3d a_1_x = _acc_1 - linearized_ba;
             Matrix3d R_w_x, R_a_0_x, R_a_1_x;
 
-            R_w_x<<0, -w_x(2), w_x(1),
-                w_x(2), 0, -w_x(0),
-                -w_x(1), w_x(0), 0;
+            R_w_x<< 0, -w_x(2), w_x(1),
+                    w_x(2), 0, -w_x(0),
+                    -w_x(1), w_x(0), 0;
             R_a_0_x<<0, -a_0_x(2), a_0_x(1),
-                a_0_x(2), 0, -a_0_x(0),
-                -a_0_x(1), a_0_x(0), 0;
+                    a_0_x(2), 0, -a_0_x(0),
+                    -a_0_x(1), a_0_x(0), 0;
             R_a_1_x<<0, -a_1_x(2), a_1_x(1),
-                a_1_x(2), 0, -a_1_x(0),
-                -a_1_x(1), a_1_x(0), 0;
+                    a_1_x(2), 0, -a_1_x(0),
+                    -a_1_x(1), a_1_x(0), 0;
 
             MatrixXd F = MatrixXd::Zero(15, 15);
             F.block<3, 3>(0, 0) = Matrix3d::Identity();
@@ -124,9 +125,9 @@ class IntegrationBase
             jacobian = F * jacobian;
             covariance = F * covariance * F.transpose() + V * noise * V.transpose();
         }
-
     }
 
+    /* 正向传播更新 */
     void propagate(double _dt, const Eigen::Vector3d &_acc_1, const Eigen::Vector3d &_gyr_1)
     {
         dt = _dt;

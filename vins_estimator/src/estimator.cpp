@@ -97,7 +97,7 @@ void Estimator::processIMU(double dt, const Vector3d &linear_acceleration, const
     }
     if (frame_count != 0)
     {
-        pre_integrations[frame_count]->push_back(dt, linear_acceleration, angular_velocity);
+        pre_integrations[frame_count]->push_back(dt, linear_acceleration, angular_velocity);//push_back会调用一次propagate进行一次更新传播
         //if(solver_flag != NON_LINEAR)
             tmp_pre_integration->push_back(dt, linear_acceleration, angular_velocity); //临时预积分,在push_back函数中会调用一次propagate
         // {dt, linear_acceleration， angular_velocity}_buf 是imu测量值的缓存，是已经对齐的
@@ -106,7 +106,7 @@ void Estimator::processIMU(double dt, const Vector3d &linear_acceleration, const
         angular_velocity_buf[frame_count].push_back(angular_velocity);
 
         int j = frame_count;
-        // 与estimator_node.cpp 中的 predict函数原理一样, 都是积分的离散
+        // 与estimator_node.cpp 中的 predict函数原理一样, 都是积分的离散,结果更新至本类中的Ps、Rs、Vs中去
         Vector3d un_acc_0 = Rs[j] * (acc_0 - Bas[j]) - g;
         Vector3d un_gyr = 0.5 * (gyr_0 + angular_velocity) - Bgs[j];
         Rs[j] *= Utility::deltaQ(un_gyr * dt).toRotationMatrix();
