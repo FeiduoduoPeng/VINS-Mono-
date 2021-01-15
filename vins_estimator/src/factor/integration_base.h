@@ -71,6 +71,8 @@ class IntegrationBase
         result_linearized_ba = linearized_ba;
         result_linearized_bg = linearized_bg;
 
+        /* 更新雅克比矩阵，这里似乎应该大约可能是用的 Tighly-Coupled Monocular Visual-Inertial Fusion... 中的公式12，
+           即误差项的传递, 但是还需要进一步仔细研究一下细节*/
         if(update_jacobian)
         {
             Vector3d w_x = 0.5 * (_gyr_0 + _gyr_1) - linearized_bg;
